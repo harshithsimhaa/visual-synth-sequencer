@@ -1,0 +1,221 @@
+/* ==========================================================================
+   Exact UI Match for Java Swing GridPanel.java & UITheme.java
+   Pure CSS - Zero JavaScript
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: rgb(20, 20, 24);
+  color: rgb(220, 220, 230);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Main Panel (BorderLayout, border: 20px 30px 20px 30px) */
+.main-panel {
+  background-color: rgb(20, 20, 24);
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: fit-content;
+}
+
+/* Header */
+.header-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: rgb(220, 220, 230);
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: rgb(140, 140, 160);
+}
+
+/* Center Sequencer Canvas (Rounded container) */
+.sequencer-canvas {
+  background-color: rgb(30, 30, 36);
+  border: 1px solid rgb(60, 60, 70);
+  border-radius: 15px;
+  padding: 16px 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+}
+
+/* Columns header (step numbers 1 to 16) */
+.columns-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.label-spacer {
+  width: 35px;
+}
+
+.col-num {
+  width: 45px;
+  text-align: center;
+  font-size: 12px;
+  color: rgb(140, 140, 160);
+  font-weight: 500;
+}
+
+.col-num.current {
+  color: rgb(220, 220, 230);
+  font-weight: bold;
+}
+
+/* Grid Rows */
+.grid-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.row-label {
+  width: 35px;
+  font-size: 14px;
+  color: rgb(220, 220, 230);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Grid Cells (CELL_SIZE: 45px, gap: 5px) */
+.cell {
+  width: 45px;
+  height: 45px;
+  background-color: rgb(40, 40, 48);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.cell:hover {
+  filter: brightness(1.2);
+}
+
+/* Active Cell (with PURPLE_GLOW & PURPLE_ACTIVE) */
+.cell.active {
+  background-color: rgb(200, 140, 255);
+  box-shadow: 0 0 0 2px rgb(160, 80, 255), 0 0 10px rgb(160, 80, 255);
+}
+
+/* Bottom Controls */
+.bottom-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+}
+
+/* Left Buttons */
+.button-panel {
+  display: flex;
+  gap: 15px;
+}
+
+.styled-button {
+  font-size: 14px;
+  color: #ffffff;
+  background-color: rgb(112, 56, 178); /* PURPLE_GLOW.darker() */
+  border: 1px solid rgb(160, 80, 255);
+  border-radius: 6px;
+  padding: 8px 20px;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.styled-button:hover {
+  background-color: rgb(130, 65, 205);
+  box-shadow: 0 0 8px rgba(160, 80, 255, 0.5);
+}
+
+.styled-button:active {
+  background-color: rgb(100, 50, 160);
+}
+
+/* Right BPM Controls */
+.bpm-panel {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.bpm-label {
+  font-size: 14px;
+  color: rgb(220, 220, 230);
+}
+
+/* Custom Slider UI matching CustomSliderUI in Java */
+.custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 150px;
+  height: 30px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+.custom-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, rgb(160, 80, 255) 0%, rgb(160, 80, 255) 43%, rgb(40, 40, 48) 43%, rgb(40, 40, 48) 100%);
+  border-radius: 4px;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(200, 140, 255);
+  margin-top: -4px;
+}
+
+.custom-slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: rgb(40, 40, 48);
+  border-radius: 4px;
+}
+
+.custom-slider::-moz-range-progress {
+  background: rgb(160, 80, 255);
+  height: 4px;
+  border-radius: 4px;
+}
+
+.custom-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(200, 140, 255);
+  border: none;
+}
