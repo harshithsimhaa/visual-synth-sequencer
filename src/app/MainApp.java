@@ -1,11 +1,10 @@
 package app;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.File;
 
 import audio.AudioEngine;
+import model.PatternStorage;
 import model.SequencerModel;
 import ui.GridPanel;
 
@@ -13,6 +12,8 @@ public class MainApp extends JFrame {
     private final SequencerModel model;
     private final GridPanel gridPanel;
     private Timer timer;
+    private JLabel bpmLabel;
+    private JSlider bpmSlider;
     
     private int currentStep = -1;
     private int bpm = 120;
@@ -43,6 +44,7 @@ public class MainApp extends JFrame {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false);
         toolBar.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        toolBar.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
         // Transport Controls
         JButton playBtn = new JButton("▶ Play");
@@ -52,12 +54,17 @@ public class MainApp extends JFrame {
         stopBtn.addActionListener(e -> stopSequencer());
 
         // BPM Controls
-        JLabel bpmLabel = new JLabel("BPM: " + bpm);
-        JSlider bpmSlider = new JSlider(60, 240, bpm);
+        bpmLabel = new JLabel("BPM: " + bpm);
+        bpmLabel.setPreferredSize(new Dimension(70, 20));
+        bpmSlider = new JSlider(60, 240, bpm);
         bpmSlider.setPreferredSize(new Dimension(150, 25));
         bpmSlider.addChangeListener(e -> {
             bpm = bpmSlider.getValue();
             bpmLabel.setText("BPM: " + bpm);
+            try {
+                model.setBpm(bpm);
+            } catch (IllegalArgumentException ignored) {
+            }
             updateTimerSpeed();
         });
 
@@ -78,12 +85,18 @@ public class MainApp extends JFrame {
         // Assemble Controls into Toolbar
         toolBar.add(playBtn);
         toolBar.add(stopBtn);
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.add(bpmLabel);
         toolBar.add(bpmSlider);
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.add(waveToggle);
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.add(saveBtn);
         toolBar.add(loadBtn);
 
@@ -128,38 +141,30 @@ public class MainApp extends JFrame {
         gridPanel.repaint();
 
         // Query active cells in current column and trigger non-blocking audio synthesis
-        final int stepToPlay = currentStep;
-        new Thread(() -> {
-            for (int row = 0; row < SequencerModel.ROWS; row++) {
-                if (model.isCellActive(row, stepToPlay)) {
-                    double frequency = model.getFrequency(row);
-                    AudioEngine.playTone(frequency, 120, isSquareWave);
-                }
+        for (int row = 0; row < SequencerModel.ROWS; row++) {
+            if (model.isCellActive(row, currentStep)) {
+                double frequency = model.getFrequency(row);
+                AudioEngine.playTone(frequency, 120, isSquareWave);
             }
-        }).start();
+        }
     }
 
     private void handleSavePattern() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save Sequencer Pattern");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Sequencer Files (*.json, *.txt)", "json", "txt"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            model.savePattern(selectedFile);
-        }
+        PatternStorage.saveWithDialog(this, model);
     }
 
     private void handleLoadPattern() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Load Sequencer Pattern");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Sequencer Files (*.json, *.txt)", "json", "txt"));
-        
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            model.loadPattern(selectedFile);
+        PatternStorage.loadWithDialog(this, model, () -> {
             gridPanel.repaint();
-        }
+            bpm = model.getBpm();
+            if (bpmSlider != null) {
+                bpmSlider.setValue(bpm);
+            }
+            if (bpmLabel != null) {
+                bpmLabel.setText("BPM: " + bpm);
+            }
+            updateTimerSpeed();
+        });
     }
 
     public static void main(String[] args) {
