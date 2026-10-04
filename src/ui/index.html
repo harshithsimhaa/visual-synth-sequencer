@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Sequencer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="main-panel">
+    <!-- Header -->
+    <div class="header-panel">
+      <h1 class="title">MUSIC SEQUENCER</h1>
+      <div class="subtitle">16-Step Pattern</div>
+    </div>
+
+    <!-- Center Grid Canvas -->
+    <div class="sequencer-canvas">
+      <!-- Column step numbers -->
+      <div class="columns-header">
+        <div class="label-spacer"></div>
+        <div class="col-num">1</div>
+        <div class="col-num">2</div>
+        <div class="col-num">3</div>
+        <div class="col-num">4</div>
+        <div class="col-num">5</div>
+        <div class="col-num">6</div>
+        <div class="col-num">7</div>
+        <div class="col-num">8</div>
+        <div class="col-num">9</div>
+        <div class="col-num">10</div>
+        <div class="col-num">11</div>
+        <div class="col-num">12</div>
+        <div class="col-num">13</div>
+        <div class="col-num">14</div>
+        <div class="col-num">15</div>
+        <div class="col-num">16</div>
+      </div>
+
+      <!-- Row C5: {0,0,1,0, 0,0,0,0, 1,0,0,0, 0,0,1,0} -->
+      <div class="grid-row">
+        <div class="row-label">C5</div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row B4: {0,0,0,0, 1,0,0,0, 0,0,1,0, 0,0,0,0} -->
+      <div class="grid-row">
+        <div class="row-label">B4</div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row A4: {1,0,0,0, 0,0,1,0, 0,0,0,0, 1,0,0,0} -->
+      <div class="grid-row">
+        <div class="row-label">A4</div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row G4: {0,1,0,1, 0,0,0,0, 0,1,0,1, 0,0,0,0} -->
+      <div class="grid-row">
+        <div class="row-label">G4</div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row F4: {0,0,0,0, 0,1,0,0, 0,0,0,0, 0,1,0,0} -->
+      <div class="grid-row">
+        <div class="row-label">F4</div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row E4: {1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0} -->
+      <div class="grid-row">
+        <div class="row-label">E4</div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+      </div>
+
+      <!-- Row D4: {0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1} -->
+      <div class="grid-row">
+        <div class="row-label">D4</div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+      </div>
+
+      <!-- Row C4: {1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0} -->
+      <div class="grid-row">
+        <div class="row-label">C4</div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell active"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-panel">
+      <div class="button-panel">
+        <button class="styled-button">PLAY</button>
+        <button class="styled-button">STOP</button>
+        <button class="styled-button">CLEAR</button>
+      </div>
+
+      <div class="bpm-panel">
+        <span class="bpm-label">BPM: 120</span>
+        <input type="range" class="custom-slider" min="60" max="200" value="120">
+      </div>
+    </div>
+  </div>
+</body>
+</html>
