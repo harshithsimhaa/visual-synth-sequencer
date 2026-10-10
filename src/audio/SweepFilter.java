@@ -1,66 +1,48 @@
 package audio;
+
 public class SweepFilter {
+    private float cutoff = 1000.0f;
+    private float resonance = 0.5f;
+    private float lfoRate = 2.0f;
+    private float lfoPhase = 0.0f;
 
-    private final float sampleRate;
-    private float low, band, high;
-    private double lfoPhase = 0.0;
+    // Filter states
+    private float low = 0.0f;
+    private float band = 0.0f;
+    private float high = 0.0f;
 
-    private volatile float baseCutoff = 1000f;  
-    private volatile float resonance  = 0.6f;   
-    private volatile float lfoRate    = 0.5f;   
-    private volatile float lfoDepth   = 2.0f;   
-    private volatile boolean enabled  = true;
-
-    private float cutoffSmooth;
-    private float resonanceSmooth;
-    private static final float SMOOTHING = 0.002f;
-
-    public SweepFilter(float sampleRate) {
-        this.sampleRate = sampleRate;
-        this.cutoffSmooth = baseCutoff;
-        this.resonanceSmooth = resonance;
+    public void setCutoff(float cutoff) {
+        this.cutoff = Math.max(30.0f, Math.min(8000.0f, cutoff));
     }
 
-    public void setCutoff(float hz) { baseCutoff = clamp(hz, 30f, 8000f); }
-    public void setResonance(float r) { resonance = clamp(r, 0f, 0.95f); }
-    public void setLfoRate(float hz) { lfoRate = clamp(hz, 0f, 20f); }
-    public void setLfoDepth(float octaves) { lfoDepth = clamp(octaves, 0f, 6f); }
-    public void setEnabled(boolean on) { enabled = on; }
-    public boolean isEnabled() { return enabled; }
-
-    public void reset() {
-        low = band = high = 0f;
-        lfoPhase = 0.0;
+    public void setResonance(float resonance) {
+        this.resonance = Math.max(0.0f, Math.min(0.95f, resonance));
     }
 
-    public float process(float in) {
-        if (!enabled) return in;
+    public void setLfoRate(float lfoRate) {
+        this.lfoRate = Math.max(0.0f, Math.min(20.0f, lfoRate));
+    }
 
-        cutoffSmooth    += (baseCutoff - cutoffSmooth)    * SMOOTHING;
-        resonanceSmooth += (resonance  - resonanceSmooth) * SMOOTHING;
-
-        float lfo = (float) Math.sin(2.0 * Math.PI * lfoPhase);
-        lfoPhase += lfoRate / sampleRate;
-        if (lfoPhase >= 1.0) lfoPhase -= 1.0;
-
-        float cutoff = cutoffSmooth * (float) Math.pow(2.0, lfo * lfoDepth * 0.5f);
-        cutoff = clamp(cutoff, 30f, sampleRate / 6f);   
-
-        float f = 2f * (float) Math.sin(Math.PI * cutoff / sampleRate);
-        float q = 2f * (1f - resonanceSmooth);
-
-        low  += f * band;
-        high  = in - low - q * band;
-        band += f * high;
-
-        if (Float.isNaN(low) || Float.isInfinite(low)) {
-            reset();
-            return 0f;
+    /**
+     * Processes a single audio sample through the resonant state-variable filter with thread safety.
+     */
+    public synchronized float process(float in) {
+        // Advance LFO phase (assuming 44100 Hz sample rate)
+        lfoPhase += lfoRate / 44100.0f;
+        if (lfoPhase > 1.0f) {
+            lfoPhase -= 1.0f;
         }
-        return clamp(low, -1f, 1f);
-    }
 
-    private static float clamp(float v, float lo, float hi) {
-        return Math.max(lo, Math.min(hi, v));
+        // Modulate cutoff frequency with LFO
+        float modulatedCutoff = cutoff * (1.0f + 0.5f * (float) Math.sin(2.0 * Math.PI * lfoPhase));
+        float f = 2.0f * (float) Math.sin(Math.PI * Math.min(modulatedCutoff / 44100.0f, 0.49f));
+        float q = 1.0f - resonance;
+
+        // Correct Chamberlin SVF calculation order requested by reviewer:
+        high = in - low - (q * band);
+        band += f * high;
+        low += f * band;
+
+        return low;
     }
 }
