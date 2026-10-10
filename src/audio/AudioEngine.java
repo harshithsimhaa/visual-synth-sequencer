@@ -231,4 +231,37 @@ public final class AudioEngine {
 
             // Big-endian 16-bit PCM mono
             buffer[frame * 2] = (byte) ((pcmSample >> 8) & 0xFF);
-            buffer[frame * 2 + 1] = (byte) (pcmSample
+            buffer[frame * 2 + 1] = (byte) (pcmSample & 0xFF);
+        }
+
+        return buffer;
+    }
+
+    private static double calculateEnvelope(int frame, int totalFrames, int attack, int decay, int sustain, int release) {
+        if (frame < attack) {
+            return (double) frame / Math.max(1, attack);
+        } else if (frame < attack + decay) {
+            double progress = (double) (frame - attack) / Math.max(1, decay);
+            return 1.0 - progress * (1.0 - SUSTAIN_LEVEL);
+        } else if (frame < attack + decay + sustain) {
+            return SUSTAIN_LEVEL;
+        } else {
+            int releaseFrame = frame - (totalFrames - release);
+            double progress = (double) releaseFrame / Math.max(1, release);
+            return Math.max(0.0, SUSTAIN_LEVEL * (1.0 - progress));
+        }
+    }
+
+    private static double generateSample(Waveform wf, double freq, int frame) {
+        double t = (double) frame / SAMPLE_RATE;
+        double phase = (t * freq) % 1.0;
+
+        return switch (wf) {
+            case SINE -> Math.sin(2.0 * Math.PI * phase);
+            case TRIANGLE -> 2.0 * Math.abs(2.0 * (phase - Math.floor(phase + 0.5))) - 1.0;
+            case SAW -> 2.0 * (phase - Math.floor(phase + 0.5));
+            case SQUARE -> phase < 0.5 ? 1.0 : -1.0;
+            case NOISE -> ThreadLocalRandom.current().nextDouble(-1.0, 1.0);
+        };
+    }
+}
