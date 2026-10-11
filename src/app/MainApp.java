@@ -1,9 +1,13 @@
 package app;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 import audio.AudioEngine;
+import audio.BeatDetector;
 import model.PatternStorage;
 import model.SequencerModel;
 import ui.GridPanel;
@@ -17,7 +21,8 @@ public class MainApp extends JFrame {
 
     private int currentStep = -1;
     private int bpm = 120;
-    private AudioEngine.Waveform currentWaveform = AudioEngine.Waveform.SINE;
+private AudioEngine.Waveform currentWaveform = AudioEngine.Waveform.SINE;
+private JComboBox<String> presetChordDropdown;
 
     public MainApp() {
         setTitle("Visual Synth Sequencer — Executive Control Panel");
@@ -35,7 +40,7 @@ public class MainApp extends JFrame {
 
         pack();
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         initTimingEngine();
     }
@@ -94,18 +99,25 @@ public class MainApp extends JFrame {
             }
         });
 
-        // Save, Load, and Reset Controls
-        JButton saveBtn = new JButton("Save Pattern");
-        JButton loadBtn = new JButton("Load Pattern");
-        JButton resetBtn = new JButton("Reset Grid");
+// Static Preset Chord / Pattern Dropdown
+String[] presetNames = {"Presets: None", "C-Major Arpeggio", "Basic Beat", "C-Major Chord"};
+presetChordDropdown = new JComboBox<>(presetNames);
+presetChordDropdown.setToolTipText("Select static chord or pattern preset");
+presetChordDropdown.addActionListener(e -> handlePresetSelection());
 
-        saveBtn.addActionListener(e -> handleSavePattern());
-        loadBtn.addActionListener(e -> handleLoadPattern());
-        resetBtn.addActionListener(e -> {
-            model.clear();
-            gridPanel.repaint();
-        });
+// Save, Load, Reset, and Import Controls
+JButton saveBtn = new JButton("Save Pattern");
+JButton loadBtn = new JButton("Load Pattern");
+JButton resetBtn = new JButton("Reset Grid");
+JButton importWavBtn = new JButton("Import Beat from WAV");
 
+saveBtn.addActionListener(e -> handleSavePattern());
+loadBtn.addActionListener(e -> handleLoadPattern());
+resetBtn.addActionListener(e -> {
+    model.clear();
+    gridPanel.repaint();
+});
+importWavBtn.addActionListener(e -> handleImportBeat());
         // Assemble Controls into Toolbar
         toolBar.add(playBtn);
         toolBar.add(stopBtn);
@@ -122,10 +134,21 @@ public class MainApp extends JFrame {
         toolBar.add(Box.createHorizontalStrut(10));
         toolBar.addSeparator();
         toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.add(new JLabel("Preset:"));
+        toolBar.add(presetChordDropdown);
+        toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
         toolBar.add(saveBtn);
         toolBar.add(loadBtn);
-        toolBar.add(Box.createHorizontalStrut(5));
-        toolBar.add(resetBtn);
+toolBar.add(Box.createHorizontalStrut(10));
+toolBar.addSeparator();
+toolBar.add(Box.createHorizontalStrut(10));
+toolBar.add(resetBtn);
+toolBar.add(Box.createHorizontalStrut(10));
+toolBar.addSeparator();
+toolBar.add(Box.createHorizontalStrut(10));
+toolBar.add(importWavBtn);
 
         return toolBar;
     }
@@ -167,11 +190,29 @@ public class MainApp extends JFrame {
         gridPanel.setPlayheadStep(currentStep);
         gridPanel.repaint();
 
-        // Query active cells in current column and trigger non-blocking audio synthesis
+        boolean songActive = AudioEngine.isSongLoaded();
+        boolean sampleTriggered = false;
+
+        // Query active cells in current column and trigger audio
         for (int row = 0; row < SequencerModel.ROWS; row++) {
             if (model.isCellActive(row, currentStep)) {
-                double frequency = model.getFrequency(row);
-                AudioEngine.playTone(frequency, 120, currentWaveform);
+// Query active cells in current column and trigger audio
+boolean songActive = AudioEngine.isSongLoaded();
+boolean sampleTriggered = false;
+
+for (int row = 0; row < SequencerModel.ROWS; row++) {
+    if (model.isCellActive(row, currentStep)) {
+        if (songActive && !sampleTriggered) {
+            // Play the audio slice once per step (avoid stacking duplicates)
+            AudioEngine.playSample(currentStep);
+            sampleTriggered = true;
+        } else if (!songActive) {
+            // Fallback: synthesize tone using your multi-waveform dropdown selection
+            double frequency = model.getFrequency(row);
+            AudioEngine.playTone(frequency, 120, currentWaveform);
+        }
+    }
+}
             }
         }
     }
@@ -192,6 +233,100 @@ public class MainApp extends JFrame {
             }
             updateTimerSpeed();
         });
+    }
+
+    private void handlePresetSelection() {
+        if (presetChordDropdown == null) return;
+        int index = presetChordDropdown.getSelectedIndex();
+        if (index <= 0) return;
+
+        model.clear();
+        switch (index) {
+            case 1 -> { // C-Major Arpeggio
+                model.setCell(0, 0, true);
+                model.setCell(3, 2, true);
+                model.setCell(5, 4, true);
+                model.setCell(7, 6, true);
+                model.setCell(0, 8, true);
+                model.setCell(3, 10, true);
+                model.setCell(5, 12, true);
+                model.setCell(7, 14, true);
+            }
+            case 2 -> { // Basic Beat
+                for (int c = 0; c < SequencerModel.COLS; c += 4) {
+                    model.setCell(0, c, true);
+                    model.setCell(7, c, true);
+                }
+                model.setCell(4, 2, true);
+                model.setCell(4, 6, true);
+                model.setCell(4, 10, true);
+                model.setCell(4, 14, true);
+            }
+            case 3 -> { // C-Major Chord
+                for (int c = 0; c < SequencerModel.COLS; c += 4) {
+                    model.setCell(0, c, true);
+                    model.setCell(3, c, true);
+                    model.setCell(5, c, true);
+                    model.setCell(7, c, true);
+                }
+            }
+        }
+        gridPanel.repaint();
+    }
+
+    private void handleImportBeat() {
+        try {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Import Custom WAV Beat");
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("WAV Audio (*.wav)", "wav");
+            chooser.setFileFilter(filter);
+            chooser.setAcceptAllFileFilterUsed(false);
+
+            int result = chooser.showOpenDialog(this);
+            if (result != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            File selectedFile = chooser.getSelectedFile();
+            if (selectedFile == null) {
+                return;
+            }
+
+            // 1. Bypass & ignore any selected item in the static preset chord dropdown
+            if (presetChordDropdown != null) {
+                presetChordDropdown.setSelectedIndex(0);
+            }
+
+            // 2. Dynamically extract 16-step beat energy from the custom WAV file
+            boolean[] detectedBeats = BeatDetector.analyzeAudio(selectedFile);
+            if (detectedBeats == null || detectedBeats.length < SequencerModel.COLS) {
+                return;
+            }
+
+            // 3. Load the song's PCM data into AudioEngine for slice playback
+            try {
+                AudioEngine.loadSongData(selectedFile);
+            } catch (IOException | javax.sound.sampled.UnsupportedAudioFileException ex) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Beat grid loaded but audio playback could not be prepared:\n" + ex.getMessage(),
+                    "Audio Load Warning",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                // Beat grid still works; synth fallback will be used
+            }
+
+            // 4. Consume newly extracted 16-step boolean array into sequencer model
+            model.loadBeatPattern(detectedBeats);
+            gridPanel.repaint();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to import beat from audio file: " + e.getMessage(),
+                "Import Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     public static void main(String[] args) {

@@ -27,6 +27,7 @@ public class SequencerModelTest {
         testFrequencies();
         testBpmGetSet();
         testSetCellAndClear();
+        testLoadBeatPattern();
         testSaveLoadRoundTrip();
         testLoadWrongRowCount();
         testLoadWrongColumnLength();
@@ -117,6 +118,29 @@ public class SequencerModelTest {
         m.clear();
         check("clear: (0,0) is false after clear", !m.isCellActive(0, 0));
         check("clear: (7,15) is false after clear", !m.isCellActive(7, 15));
+    }
+
+    private static void testLoadBeatPattern() {
+        SequencerModel m = new SequencerModel();
+        boolean[] pattern = new boolean[SequencerModel.COLS];
+        pattern[0] = true;
+        pattern[4] = true;
+        pattern[8] = true;
+        pattern[12] = true;
+
+        m.setCell(0, 0, true);
+        m.loadBeatPattern(pattern);
+
+        check("loadBeatPattern: step 0 active on row 7", m.isCellActive(7, 0));
+        check("loadBeatPattern: step 4 active on row 7", m.isCellActive(7, 4));
+        check("loadBeatPattern: step 8 active on row 7", m.isCellActive(7, 8));
+        check("loadBeatPattern: step 12 active on row 7", m.isCellActive(7, 12));
+        check("loadBeatPattern: step 1 inactive on row 7", !m.isCellActive(7, 1));
+        check("loadBeatPattern: cleared row 0", !m.isCellActive(0, 0));
+
+        boolean[] copy = m.getRow(7);
+        check("getRow: length is 16", copy.length == 16);
+        check("getRow: matches pattern step 0", copy[0]);
     }
 
     private static void testSaveLoadRoundTrip() {

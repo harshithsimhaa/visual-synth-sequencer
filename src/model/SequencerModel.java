@@ -125,6 +125,69 @@ public class SequencerModel {
     }
 
     /**
+     * Consumes a 16-step boolean array of detected beats from a custom audio file.
+     * Maps the extracted rhythms to the soundboard (primary bass/kick row) and refreshes
+     * the active pattern.
+     *
+     * @param beatPattern 16-element boolean array representing detected beats
+     */
+    public synchronized void loadBeatPattern(boolean[] beatPattern) {
+        if (beatPattern == null || beatPattern.length != COLS) {
+            return;
+        }
+        clear();
+        for (int col = 0; col < COLS; col++) {
+            grid[ROWS - 1][col] = beatPattern[col];
+        }
+    }
+
+    /**
+     * Alias for {@link #loadBeatPattern(boolean[])} to set the dynamic beat pattern.
+     *
+     * @param beatPattern 16-element boolean array representing detected beats
+     */
+    public synchronized void setBeatPattern(boolean[] beatPattern) {
+        loadBeatPattern(beatPattern);
+    }
+
+    /**
+     * Sets an entire row's 16 steps from a boolean pattern array.
+     *
+     * @param row     the row index (0–{@value #ROWS}-1)
+     * @param pattern the 16-element boolean array representing active steps
+     * @throws IllegalArgumentException if {@code row} is invalid, {@code pattern} is null,
+     *                                  or {@code pattern.length} != {@value #COLS}
+     */
+    public synchronized void setRow(int row, boolean[] pattern) {
+        if (row < 0 || row >= ROWS) {
+            throw new IllegalArgumentException(
+                "Row index out of range: " + row + " (valid: 0–" + (ROWS - 1) + ")");
+        }
+        if (pattern == null || pattern.length != COLS) {
+            throw new IllegalArgumentException(
+                "Pattern array must be non-null and have length " + COLS);
+        }
+        System.arraycopy(pattern, 0, grid[row], 0, COLS);
+    }
+
+    /**
+     * Returns a copy of an entire row's 16 steps.
+     *
+     * @param row the row index (0–{@value #ROWS}-1)
+     * @return a defensive copy of the 16-step boolean array for this row
+     * @throws IllegalArgumentException if {@code row} is out of range
+     */
+    public synchronized boolean[] getRow(int row) {
+        if (row < 0 || row >= ROWS) {
+            throw new IllegalArgumentException(
+                "Row index out of range: " + row + " (valid: 0–" + (ROWS - 1) + ")");
+        }
+        boolean[] copy = new boolean[COLS];
+        System.arraycopy(grid[row], 0, copy, 0, COLS);
+        return copy;
+    }
+
+    /**
      * Resets every cell in the grid to inactive.
      */
     public synchronized void clear() {
