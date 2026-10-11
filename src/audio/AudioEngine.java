@@ -144,7 +144,7 @@ public class AudioEngine {
         private final double volume;
         private final int totalFrames;
         private final int fadeFrames;
-        private final SweepFilter filter = new SweepFilter();
+        private final SweepFilter filter = new SweepFilter(SAMPLE_RATE);
 
         private double phase = 0.0;
         private int frame = 0;
