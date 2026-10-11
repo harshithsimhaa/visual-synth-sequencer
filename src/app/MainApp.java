@@ -21,8 +21,8 @@ public class MainApp extends JFrame {
 
     private int currentStep = -1;
     private int bpm = 120;
-private AudioEngine.Waveform currentWaveform = AudioEngine.Waveform.SINE;
-private JComboBox<String> presetChordDropdown;
+    private AudioEngine.Waveform currentWaveform = AudioEngine.Waveform.SINE;
+    private JComboBox<String> presetChordDropdown;
 
     public MainApp() {
         setTitle("Visual Synth Sequencer — Executive Control Panel");
@@ -99,25 +99,26 @@ private JComboBox<String> presetChordDropdown;
             }
         });
 
-// Static Preset Chord / Pattern Dropdown
-String[] presetNames = {"Presets: None", "C-Major Arpeggio", "Basic Beat", "C-Major Chord"};
-presetChordDropdown = new JComboBox<>(presetNames);
-presetChordDropdown.setToolTipText("Select static chord or pattern preset");
-presetChordDropdown.addActionListener(e -> handlePresetSelection());
+        // Static Preset Chord / Pattern Dropdown
+        String[] presetNames = {"Presets: None", "C-Major Arpeggio", "Basic Beat", "C-Major Chord"};
+        presetChordDropdown = new JComboBox<>(presetNames);
+        presetChordDropdown.setToolTipText("Select static chord or pattern preset");
+        presetChordDropdown.addActionListener(e -> handlePresetSelection());
 
-// Save, Load, Reset, and Import Controls
-JButton saveBtn = new JButton("Save Pattern");
-JButton loadBtn = new JButton("Load Pattern");
-JButton resetBtn = new JButton("Reset Grid");
-JButton importWavBtn = new JButton("Import Beat from WAV");
+        // Save, Load, Reset, and Import Controls
+        JButton saveBtn = new JButton("Save Pattern");
+        JButton loadBtn = new JButton("Load Pattern");
+        JButton resetBtn = new JButton("Reset Grid");
+        JButton importWavBtn = new JButton("Import Beat from WAV");
 
-saveBtn.addActionListener(e -> handleSavePattern());
-loadBtn.addActionListener(e -> handleLoadPattern());
-resetBtn.addActionListener(e -> {
-    model.clear();
-    gridPanel.repaint();
-});
-importWavBtn.addActionListener(e -> handleImportBeat());
+        saveBtn.addActionListener(e -> handleSavePattern());
+        loadBtn.addActionListener(e -> handleLoadPattern());
+        resetBtn.addActionListener(e -> {
+            model.clear();
+            gridPanel.repaint();
+        });
+        importWavBtn.addActionListener(e -> handleImportBeat());
+
         // Assemble Controls into Toolbar
         toolBar.add(playBtn);
         toolBar.add(stopBtn);
@@ -141,14 +142,14 @@ importWavBtn.addActionListener(e -> handleImportBeat());
         toolBar.add(Box.createHorizontalStrut(10));
         toolBar.add(saveBtn);
         toolBar.add(loadBtn);
-toolBar.add(Box.createHorizontalStrut(10));
-toolBar.addSeparator();
-toolBar.add(Box.createHorizontalStrut(10));
-toolBar.add(resetBtn);
-toolBar.add(Box.createHorizontalStrut(10));
-toolBar.addSeparator();
-toolBar.add(Box.createHorizontalStrut(10));
-toolBar.add(importWavBtn);
+        toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.add(resetBtn);
+        toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.addSeparator();
+        toolBar.add(Box.createHorizontalStrut(10));
+        toolBar.add(importWavBtn);
 
         return toolBar;
     }
@@ -196,23 +197,15 @@ toolBar.add(importWavBtn);
         // Query active cells in current column and trigger audio
         for (int row = 0; row < SequencerModel.ROWS; row++) {
             if (model.isCellActive(row, currentStep)) {
-// Query active cells in current column and trigger audio
-boolean songActive = AudioEngine.isSongLoaded();
-boolean sampleTriggered = false;
-
-for (int row = 0; row < SequencerModel.ROWS; row++) {
-    if (model.isCellActive(row, currentStep)) {
-        if (songActive && !sampleTriggered) {
-            // Play the audio slice once per step (avoid stacking duplicates)
-            AudioEngine.playSample(currentStep);
-            sampleTriggered = true;
-        } else if (!songActive) {
-            // Fallback: synthesize tone using your multi-waveform dropdown selection
-            double frequency = model.getFrequency(row);
-            AudioEngine.playTone(frequency, 120, currentWaveform);
-        }
-    }
-}
+                if (songActive && !sampleTriggered) {
+                    // Play the audio slice once per step (avoid stacking duplicates)
+                    AudioEngine.playSample(currentStep);
+                    sampleTriggered = true;
+                } else if (!songActive) {
+                    // Fallback: synthesize tone using your multi-waveform dropdown selection
+                    double frequency = model.getFrequency(row);
+                    AudioEngine.playTone(frequency, 120, currentWaveform);
+                }
             }
         }
     }
@@ -313,7 +306,6 @@ for (int row = 0; row < SequencerModel.ROWS; row++) {
                     "Audio Load Warning",
                     JOptionPane.WARNING_MESSAGE
                 );
-                // Beat grid still works; synth fallback will be used
             }
 
             // 4. Consume newly extracted 16-step boolean array into sequencer model
